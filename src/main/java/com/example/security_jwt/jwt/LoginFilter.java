@@ -34,8 +34,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             System.out.println(username);
 
             UsernamePasswordAuthenticationToken authToken=new UsernamePasswordAuthenticationToken(username, password, null);
+            System.out.println(username);
 
-            return getAuthenticationManager().authenticate(authToken);
+            return authenticationManager.authenticate(authToken);
 
         } catch (StreamReadException e) {
             throw new RuntimeException(e);
@@ -47,14 +48,15 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     }
 
+//    로그인 진행시 로그인 성공, 실패에 대한 처리를 아래의 함수에서 작성.
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
         //추후에 여기에서 jwt 토큰 발급 관련처리를 진행.
-
+        System.out.println("success");
 
     }
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-
+        System.out.println("FAIL");
     }
 }
