@@ -1,5 +1,6 @@
 package com.example.security_jwt.jwt;
 
+import com.example.security_jwt.dto.CustomUserDetails;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import jakarta.servlet.FilterChain;
@@ -9,18 +10,23 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
+    private final JWTUtil jwtUtil;
 
-    public LoginFilter(AuthenticationManager authenticationManager){
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil){
         this.authenticationManager=authenticationManager;
+        this.jwtUtil=jwtUtil;
     }
 
     private final ObjectMapper objectMapper=new ObjectMapper();
@@ -52,11 +58,23 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
         //추후에 여기에서 jwt 토큰 발급 관련처리를 진행.
-        System.out.println("success");
+        CustomUserDetails customUserDetails=(CustomUserDetails) authentication.getPrincipal();
+        String username=customUserDetails.getUsername();
+
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
+        GrantedAuthority auth = iterator.next();
+
+        String role = auth.getAuthority();
+
+        String token = jwtUtil.createJWT(username, role, 600*60*10L);
+
+        response.addHeader("Authorization", "Bearer " + token);
+
 
     }
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-        System.out.println("FAIL");
+        response.setStatus(401);
     }
 }
