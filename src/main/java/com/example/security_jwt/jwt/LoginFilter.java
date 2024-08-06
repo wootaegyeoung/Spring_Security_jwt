@@ -67,14 +67,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJWT(username, role, 600*60*10L);
+        String token = jwtUtil.createJWT(username, role, 60*60*10L);
+        String refreshToken = jwtUtil.createRefreshJWT(username, role, 1000*60*60*24*7L);
 
         response.addHeader("Authorization", "Bearer " + token);
-
+        response.addHeader("refreshToken","Bearer " +  refreshToken);
 
     }
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
         response.setStatus(401);
+
     }
+
 }
