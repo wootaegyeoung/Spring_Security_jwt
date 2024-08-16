@@ -3,6 +3,7 @@ package com.example.security_jwt.config;
 import com.example.security_jwt.jwt.JWTFilter;
 import com.example.security_jwt.jwt.JWTUtil;
 import com.example.security_jwt.jwt.LoginFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private JWTUtil jwtUtil;
+    private ObjectMapper objectMapper=new ObjectMapper();
 
     public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil){
         this.authenticationConfiguration=authenticationConfiguration;
@@ -56,7 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/", "/join").permitAll()
                         .anyRequest().authenticated());
         http
-                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+                .addFilterBefore(new JWTFilter(jwtUtil, objectMapper), LoginFilter.class);
 
 
         http
